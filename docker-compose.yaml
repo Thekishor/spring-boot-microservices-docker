@@ -1,0 +1,101 @@
+
+services:
+  discovery-server:
+    image: thekishor/discovery-server:0.0.1
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservice-docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://discovery-server:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  config-server:
+    image: thekishor/config-server:0.0.1
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://config-server:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - microservice-docker
+
+  cloud-gateway:
+    image: thekishor/cloud-gateway:0.0.1
+    container_name: cloud-gateway
+    ports:
+      - "8060:8060"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://cloud-gateway:8060/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - microservice-docker
+    restart: always
+
+  user-service:
+    image: thekishor/user-service:0.0.1
+    container_name: user-service
+    ports:
+      - "8089:8089"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://user-service:8089/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservice-docker
+    restart: always
+
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - microservice-docker
+    restart: unless-stopped
+
+networks:
+  microservice-docker:
+    driver: bridge
+volumes:
+  postgres:
