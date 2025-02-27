@@ -12,6 +12,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 20s
 
   config-server:
     image: thekishor/config-server:0.0.1
@@ -59,6 +60,14 @@ services:
       - "8089:8089"
     env_file:
       - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_DATASOURCE_URL=${POSTGRES_URL}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${POSTGRES_DIALECT}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${HIBERNATE_DDL}
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://user-service:8089/actuator/health" ]
       interval: 30s
@@ -81,15 +90,64 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_DB}" ]
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s
+    networks:
+      - microservice-docker
+    restart: unless-stopped
+
+  product-service:
+    image: thekishor/product-service:0.0.1
+    container_name: product-service
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${MYSQL_URL}
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${MYSQL_DIALECT}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${HIBERNATE_DDL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://product-service:8090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservice-docker
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h mysql -u${MYSQL_USERNAME} -p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - microservice-docker
     restart: unless-stopped
@@ -98,4 +156,5 @@ networks:
   microservice-docker:
     driver: bridge
 volumes:
-  postgres:
+  postgres_data:
+  mysql_data:

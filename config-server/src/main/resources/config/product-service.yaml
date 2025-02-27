@@ -1,18 +1,17 @@
 server:
-  port: 8060
+  port: 8090
 
 spring:
-  cloud:
-    gateway:
-      routes:
-        - id: USER-SERVICE
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/user/**
-        - id: PRODUCT_SERVICE
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/product/**,/category/**
+  datasource:
+    url: jdbc:mysql://localhost:3306/product
+    username: root
+    password: kishor@2233#
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 eureka:
   instance:
