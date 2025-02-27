@@ -141,7 +141,7 @@ services:
       - MYSQL_DATABASE=${MYSQL_DB}
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h mysql -u${MYSQL_USERNAME} -p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h mysql -u${MYSQL_USERNAME} -p${MYSQL_PASSWORD}"]
       interval: 30s
       timeout: 10s
       retries: 5
