@@ -1,7 +1,7 @@
 package com.userservice.Config;
 
 import com.userservice.Service.JwtService;
-import com.userservice.Service.UserInfoDetails;
+import com.userservice.Service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
-    private final UserInfoDetails userInfoDetails;
+    private final UserDetailsServiceImpl userInfoDetails;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

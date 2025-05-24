@@ -9,7 +9,7 @@ import com.userservice.Payload.LoginRequest;
 import com.userservice.Response.ApiResponse;
 import com.userservice.Service.JwtService;
 import com.userservice.Service.RefreshTokenService;
-import com.userservice.Service.UserInfoDetails;
+import com.userservice.Service.UserDetailsServiceImpl;
 import com.userservice.Service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class UserController {
 
     private final UserService userService;
 
-    private final UserInfoDetails userInfoDetails;
+    private final UserDetailsServiceImpl userInfoDetails;
 
     private final AuthenticationManager authenticationManager;
 

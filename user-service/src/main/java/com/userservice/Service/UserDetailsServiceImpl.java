@@ -6,14 +6,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.userservice.Model.User;
-import com.userservice.Model.UserPrinciple;
+import com.userservice.Model.UserDetailsImpl;
 import com.userservice.Repository.UserRepo;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserInfoDetails implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepo userRepo;
 
@@ -24,7 +24,7 @@ public class UserInfoDetails implements UserDetailsService {
             if (user == null){
                 throw new UsernameNotFoundException("User not found with name:" +username);
             }
-            return new UserPrinciple(user);
+            return new UserDetailsImpl(user);
         } catch (Exception exception){
             throw new UsernameNotFoundException("Failed to receive user details for username: {}" +username, exception);
         }

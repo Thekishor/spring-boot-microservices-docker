@@ -2,6 +2,14 @@ server:
   port: 8089
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id:
+            client-secret:
+            scope: profile,email
   datasource:
     url: jdbc:postgresql://localhost:5432/user
     username: postgres

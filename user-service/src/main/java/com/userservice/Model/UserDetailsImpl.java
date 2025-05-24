@@ -5,33 +5,37 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class UserPrinciple implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
 
-    private final User user;
+    private final String username;
 
-    public UserPrinciple(User user) {
-        this.user=user;
+    private final String password;
+
+    private final Set<GrantedAuthority> authorities;
+
+    public UserDetailsImpl(User user) {
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        authorities = user.getRoles().stream().map(role ->
+                new SimpleGrantedAuthority("ROLE_"+ role.getName()))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<Role> roles = user.getRoles();
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        for (Role role : roles){
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        }
       return authorities;
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return username;
     }
 
     @Override
